@@ -1,141 +1,115 @@
-# Magento 2 Full Page Cache Warmer CLI (Varnish & Built-in FPC)
+# Magento 2 Full Page Cache Warmer CLI Extension
 
 [![Magento 2.4.x](https://img.shields.io/badge/Magento-2.4.x-orange.svg?logo=magento)](https://business.adobe.com/products/magento/magento-commerce.html)
-[![PHP 8.1 | 8.2 | 8.3](https://img.shields.io/badge/PHP-8.1%20%7C%208.2%20%7C%208.3-777BB4.svg?logo=php)](https://www.php.net/)
-[![Varnish Compatible](https://img.shields.io/badge/Varnish-Compatible-blue.svg)](https://varnish-cache.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Upwork Top Rated](https://img.shields.io/badge/Upwork-Available%20for%20Hire-green.svg?logo=upwork)](https://www.upwork.com/freelancers/priyankjivani)
+[![PHP 8.1 - 8.4 Compatible](https://img.shields.io/badge/PHP-8.1%20%7C%208.2%20%7C%208.3%20%7C%208.4-777BB4.svg?logo=php)](https://www.php.net/)
+[![Composer Package](https://img.shields.io/badge/Composer-priyankjivani%2Fmodule--cache--warmer--cli-blue.svg?logo=composer)](https://packagist.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Upwork](https://img.shields.io/badge/Upwork-Available%20for%20Hire-14a800.svg?logo=upwork)](https://www.upwork.com/freelancers/priyankjivani)
 
-A high-performance store optimization tool for **Magento 2 & Adobe Commerce**. Pre-warms Magento Full Page Cache (FPC) and Varnish reverse proxies after deployment, code releases, catalog updates, or cache flushes using non-blocking multi-threaded asynchronous HTTP crawling.
+High-performance, multi-threaded cache warmer CLI command for **Magento 2 & Adobe Commerce**. Dramatically boosts Varnish and Full Page Cache (FPC) hit ratios after deployments, index invalidations, or catalog imports by asynchronously pre-warming store URLs.
 
 Developed and maintained by **[Priyank Jivani](https://github.com/priyankjivani123)** (Senior Magento 2 Backend Developer).
 
 ---
 
-## ⚡ The Problem: Cache Misses Hurt Conversions
-
-Every time you flush your Magento cache or deploy updates:
-1. **First-time shoppers suffer slow TTFB (Time to First Byte)** of 2–5 seconds while Magento compiles layout XML and blocks on the fly.
-2. **Server CPU and MySQL loads spike** drastically under un-cached traffic.
-3. **Core Web Vitals scores and Google SEO rankings drop** due to slow Largest Contentful Paint (LCP).
-
-**`priyank/module-cache-warmer-cli`** warms your catalog in minutes before actual shoppers visit your site.
-
----
-
 ## 🚀 Key Features
 
-* **Multi-Threaded Asynchronous Crawling**: Leverages non-blocking `curl_multi` handles to fetch multiple store pages in parallel without bottlenecking server resources.
-* **Automatic Store URL Discovery**: Automatically queries active canonical product, category, and CMS URLs directly from Magento's `url_rewrite` table.
-* **XML Sitemap Integration**: Can read and warm URLs directly from standard XML sitemaps (`sitemap.xml`).
-* **Live Terminal Progress Bar**: Interactive console progress bar with real-time status code reporting, duration, and URL tracking.
-* **Full Diagnostic Metrics**: Outputs a structured summary table reporting total URLs crawled, 200 OK responses, redirects, failures, elapsed time, and average TTFB per page.
-* **Compatible with Varnish, Fastly & Built-in FPC**: Pre-populates cache keys identically for guest shoppers.
+* **Multi-Threaded Asynchronous Crawler:** Uses PHP's `curl_multi_init` non-blocking socket pool for high-concurrency requests without blocking the PHP execution thread.
+* **Automatic Catalog URL Discovery:** Intelligently extracts canonical URLs across enabled Products, Active Categories, and CMS Pages via `Magento_UrlRewrite`.
+* **Sitemap.xml Fallback Support:** Can parse external or local `sitemap.xml` feeds for high-volume catalogs.
+* **Configurable Concurrency & Rate Limiting:** Customize concurrency levels (default: 10 parallel threads) and batch chunk sizes to prevent server load spikes.
+* **Interactive Symfony Console Output:** Features real-time progress bars, response time metrics, and HTTP status code summaries.
 
 ---
 
-## 💻 CLI Usage
+## 🌐 Magento & PHP Compatibility Matrix
 
-### Standard Full-Page Cache Warming
+| Magento / Adobe Commerce Release | Supported PHP Versions | Compatibility Status | Notes |
+| :--- | :--- | :---: | :--- |
+| **Magento 2.4.4 - 2.4.5-p1** | PHP 8.1 | ✅ Supported | Tested on 2.4.4-p9 & 2.4.5-p1 |
+| **Magento 2.4.5-p2 - 2.4.6-pX** | PHP 8.1, PHP 8.2 | ✅ Supported | Tested on 2.4.6-p8 |
+| **Magento 2.4.7 - 2.4.7-pX** | PHP 8.2, PHP 8.3 | ✅ Supported | Officially verified on 2.4.7-p3 |
+| **Magento 2.4.8 (Roadmap)** | PHP 8.3, PHP 8.4 | 🚀 Forward-Compatible | Strict types, zero implicit nullable deprecations |
+| **PHP 8.5 (Future Release)** | *N/A (Pending Adobe Core)* | ⏳ Preview / Audited | Extension syntax passes PHP 8.5 compilation; awaiting Adobe Commerce core framework update |
 
+
+---
+
+## 📦 Composer Installation Instructions
+
+### Step 1: Register GitHub VCS Repository
+```bash
+composer config repositories.priyankjivani-cache-warmer-cli vcs https://github.com/priyankjivani123/magento2-cache-warmer-cli.git
+```
+
+### Step 2: Require the Package
+```bash
+composer require priyankjivani/module-cache-warmer-cli:^1.0.0
+```
+
+### Step 3: Enable the Module
+```bash
+bin/magento module:enable PriyankJivani_CacheWarmerCli
+bin/magento setup:upgrade
+bin/magento cache:flush
+```
+
+---
+
+## 💻 CLI Usage & Commands
+
+### 1. Warm Default Store Cache
 ```bash
 bin/magento cache:warmer:run
 ```
 
-### Advanced Options:
-
+### 2. Warm Specific Store View with 20 Parallel Threads
 ```bash
-# Warm with 10 concurrent parallel workers (faster crawling)
-bin/magento cache:warmer:run --concurrency=10
+bin/magento cache:warmer:run --store=1 --concurrency=20 --limit=500
+```
 
-# Limit the number of URLs to warm (e.g. top 500 pages)
-bin/magento cache:warmer:run --limit=500
-
-# Target a specific Store View (Store ID or Code)
-bin/magento cache:warmer:run --store=1
-
-# Warm URLs defined in an XML Sitemap
-bin/magento cache:warmer:run --sitemap=pub/media/sitemap.xml
+### 3. Warm from Sitemap Feed
+```bash
+bin/magento cache:warmer:run --sitemap=https://example.com/sitemap.xml
 ```
 
 ---
 
-## 🛠 Technical Requirements
-
-| Stack Component | Requirement |
-| :--- | :--- |
-| **Magento / Adobe Commerce** | 2.4.4, 2.4.5, 2.4.6, 2.4.7+ |
-| **PHP** | 8.1, 8.2, 8.3 (with `curl` extension) |
-| **Caching Tier** | Varnish 6.x / 7.x, Fastly, or Built-in Page Cache |
-| **Composer** | 2.x |
-
----
-
-## 📦 Installation Instructions
-
-### Option 1: Composer Installation (Recommended)
+## 🧪 Automated Testing
 
 ```bash
-composer require priyank/module-cache-warmer-cli
-bin/magento module:enable Priyank_CacheWarmer
-bin/magento setup:upgrade
-bin/magento setup:di:compile
-bin/magento cache:flush
-```
-
-### Option 2: Manual Installation
-
-1. Create directory `app/code/Priyank/CacheWarmer`.
-2. Extract the repository files into `app/code/Priyank/CacheWarmer`.
-3. Enable and compile:
-```bash
-bin/magento module:enable Priyank_CacheWarmer
-bin/magento setup:upgrade
-bin/magento setup:di:compile
-bin/magento cache:flush
+vendor/bin/phpunit -c phpunit.xml.dist
 ```
 
 ---
 
-## 🏗 Architecture & Code Structure
+## 📋 Changelog
 
-```
-├── Console/
-│   └── Command/
-│       └── WarmCacheCommand.php   # bin/magento cache:warmer:run
-├── Model/
-│   ├── Crawler.php                # Asynchronous multi-curl HTTP pool worker
-│   └── UrlProvider.php            # Database URL rewrite collection & XML sitemap parser
-├── etc/
-│   ├── di.xml                     # CommandList dependency injection
-│   └── module.xml
-├── composer.json
-├── registration.php
-└── README.md
-```
+See [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
 ## 📄 License
 
-Open-source module released under the [MIT License](LICENSE).
+MIT License. See [LICENSE](LICENSE).
 
 ---
 
-## 💼 Developing a Magento 2 project?
+## Developing a Magento 2 project?
 
-I help businesses build, customize, optimize, and maintain **Magento 2 / Adobe Commerce** stores.
+I help businesses build, customize, optimize and maintain Magento 2 / Adobe Commerce stores.
 
 **Available for:**
-* Magento 2 Custom Development & Architecture
-* Custom Magento Extensions & Modules
-* Bug Fixes, Audits, and Troubleshooting
-* Performance Optimization & Core Web Vitals
-* Hyvä Theme Development & Customization
-* Headless GraphQL & REST API Integrations
-* Ongoing Magento Store Maintenance
+- Magento 2 Custom Development
+- Magento Extensions
+- Bug Fixes and Troubleshooting
+- Performance Optimization
+- Hyvä Theme Development
+- API Integrations
+- Ongoing Magento Maintenance
 
-👉 **Hire me on Upwork:** [Priyank Jivani on Upwork](https://www.upwork.com/freelancers/priyankjivani)  
-👉 **GitHub Profile:** [priyankjivani123](https://github.com/priyankjivani123)
+**Hire me on Upwork:** [Priyank Jivani Upwork Profile](https://www.upwork.com/freelancers/priyankjivani)  
+**GitHub:** [github.com/priyankjivani123](https://github.com/priyankjivani123)
 
-Contact me for freelance projects and long-term enterprise collaborations.
+Contact me for freelance projects and long-term collaborations.
+

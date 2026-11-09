@@ -1,5 +1,5 @@
 {
-    "name": "priyank/module-cache-warmer-cli",
+    "name": "priyankjivani/module-cache-warmer-cli",
     "description": "High-performance Magento 2 / Adobe Commerce full-page cache warmer CLI tool with multi-threaded concurrent URL crawler, sitemap parser, and Varnish hit rate booster.",
     "type": "magento2-module",
     "version": "1.0.0",
@@ -23,7 +23,7 @@
             "registration.php"
         ],
         "psr-4": {
-            "Priyank\\CacheWarmer\\": ""
+            "PriyankJivani\\CacheWarmerCli\\": ""
         }
     }
 }

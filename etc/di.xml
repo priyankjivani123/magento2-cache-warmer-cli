@@ -4,7 +4,7 @@
     <type name="Magento\Framework\Console\CommandListInterface">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="priyank_cache_warmer" xsi:type="object">Priyank\CacheWarmer\Console\Command\WarmCacheCommand</item>
+                <item name="priyank_cache_warmer" xsi:type="object">PriyankJivani\CacheWarmerCli\Console\Command\WarmCacheCommand</item>
             </argument>
         </arguments>
     </type>

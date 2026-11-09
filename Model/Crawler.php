@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Priyank\CacheWarmer\Model;
+namespace PriyankJivani\CacheWarmerCli\Model;
 
 class Crawler
 {
